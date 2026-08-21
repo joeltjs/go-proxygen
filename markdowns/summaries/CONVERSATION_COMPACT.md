@@ -126,3 +126,46 @@ curl -X POST http://127.0.0.1:20128/v1/chat/completions \
 ---
 
 *Terakhir diupdate: 2026-08-21 — Status: OpenCode Free aktif via 9Router + proxy pool round-robin*
+
+## 🚨 UPDATE IMPORTANT - Model Availability & Privacy Reality (2026-08-21)
+
+### ⚠️ Yang Berubah:
+| Old Status | New Reality |
+|------------|-------------|
+| ✅ `qwen3.6-plus-free` available | ❌ **REMOVED** by OpenCode (promo ended!) |
+| ✅ `minimax-m3-free` available | ❌ **REMOVED** by OpenCode (quota changed!) |
+| ❓ `muse-spark-1.2-contributor` | ⚡ POWERFUL but USE WITH CAUTION |
+| ✅ `mimo-v2.5-free`, `hy3-free` | ✅ Still available (safe to use) |
+| ✅ `nemotron-3-lightning` | ✅ New addition (try cautiously) |
+
+### 🔒 HONEST PRIVACY REALITY:
+
+**SEMUA Free Tier sama saja:**
+- TIDAK ada yang 100% secure untuk data sensitive
+- HTTPS protect traffic, tapi provider still bisa log/prompts storage
+- Training policies unclear across ALL providers
+- You CANNOT get both "free" AND "guaranteed privacy"
+
+**Best practices tetap sama:**
+- Never send credentials/secrets to ANY cloud AI
+- Sanitize prompts before sending
+- Assume everything COULD be stored/logged
+- Use test/sample data only for production projects
+
+---
+
+## 🎯 CONCLUSION - Should You Continue Using This System?
+
+**YES, IF YOU ACCEPT THESE TRADEOFFS:**
+✅ Accept that no free AI is truly private
+✅ Use proxy rotation to hide your IP
+✅ Sanitize all prompts (no secrets!)
+✅ Understand it's for learning/testing, NOT sensitive work
+
+**NO, IF YOU NEED:**
+❌ Complete privacy/anonymity  
+❌ Protected sensitive data handling
+❌ Guaranteed no-training policy
+
+**Bottom Line:** Worth continuing for general coding/learning if you follow best practices! 😊
+
