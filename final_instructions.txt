@@ -1,0 +1,42 @@
+📊 FINAL PROXY LIST FOR IMPORT TO 9ROUTER
+============================================
+
+File: generated_proxy_result.txt
+Format: http://IP:PORT (2000 entries)
+Status: READY FOR BATCH IMPORT ✓
+
+✅ Format Compatible dengan 9Router
+
+HOW TO IMPORT:
+
+1. Open 9Router Dashboard: http://localhost:20128
+
+2. Go to: Proxy Pools → Batch Import
+
+3. Copy content from file:
+   cat generated_proxy_result.txt
+
+4. Paste to modal input field
+
+5. Click "Import" button
+
+6. After import completes, click Health Check icon
+
+7. Bind proxy pool to Opencode Free provider
+   - Rotation Strategy: Round-robin
+   
+8. Done! Ready to test!
+
+⚠️ RECOMMENDATION:
+- Run Health Check before first use
+- Monitor initial requests for successful rotation
+- If still getting rate limits, increase proxy count or adjust rotation frequency
+
+=== FILES AVAILABLE ===
+
+✓ generated_proxy_result.txt      - Main proxy list (ready-to-import)
+✓ generated_proxy_result_scores.json - Metadata tracking
+✓ 9router_import_list.txt          - Backup/alternative list
+
+All files use same format: http://IP:PORT per line
+

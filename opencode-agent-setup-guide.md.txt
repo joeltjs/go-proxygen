@@ -1,0 +1,183 @@
+# 🤖 Setup Instruction: Opencode Free Proxy Rolling System
+
+**Task**: Setup automatic Opencode API rotation through validated proxy pool  
+**Goal**: Bypass rate limits for testing purposes using safe proxies  
+**Target**: Run locally on your machine  
+
+---
+
+## ⚠️ IMPORTANT NOTES
+- Gunakan HTTPS secara eksklusif (jangan HTTP biasa) untuk request ke endpoint API.
+- Rotasi proxy setiap beberapa batch request agar tidak memicu rate limit.
+- Validasi proxy secara berkala karena free proxy sering mati/berganti.
+
+---
+
+## 📦 STEP 1: Install Dependencies
+
+```bash
+pip install requests aiohttp asyncio python-dotenv
+```
+
+---
+
+## 📦 STEP 2: Create Project Structure
+
+```bash
+mkdir -p opencode-proxy/{proxies,blacklist,logs}
+cd opencode-proxy
+```
+
+---
+
+## 📦 STEP 3: Download Trusted Proxy Lists
+
+Download list proxy dari source publik terpercaya:
+
+```bash
+# Source 1: Proxifly (Update berkala)
+curl -s "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/all/data.txt" > ./proxies/proxifly.txt
+
+# Source 2: TheSpeedX
+curl -s "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt" > ./proxies/thespeedx.txt
+
+# Gabungkan dan hilangkan duplikat
+cat ./proxies/*.txt | sort -u > ./proxies/all_proxies.txt
+echo "Total raw proxies: $(wc -l < ./proxies/all_proxies.txt)"
+```
+
+---
+
+## 📦 STEP 4: Proxy Validator Script
+
+Buat file `proxy_validator.py`:
+
+```python
+#!/usr/bin/env python3
+import asyncio
+import aiohttp
+import random
+
+PROXY_LIST_FILE = "./proxies/all_proxies.txt"
+VALIDATED_FILE = "./proxies/validated.txt"
+BLACKLIST_FILE = "./blacklist/dangerous.txt"
+
+VALIDATION_URL = "https://google.com"
+TIMEOUT = aiohttp.ClientTimeout(total=10)
+
+async def test_proxy(proxy_str: str) -> tuple:
+    if not proxy_str or ":" not in proxy_str:
+        return False, "invalid_format"
+    
+    proxy_url = f"http://{proxy_str}"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(VALIDATION_URL, proxy=proxy_url, timeout=TIMEOUT) as response:
+                if len(response.history) > 1:
+                    return False, "redirect_detected"
+                if response.status == 200:
+                    return True, "valid"
+                return False, f"status_{response.status}"
+    except Exception as e:
+        return False, "failed"
+
+async def main():
+    print("🔄 Memulai validasi proxy...")
+    with open(PROXY_LIST_FILE) as f:
+        all_proxies = [line.strip() for line in f if line.strip()]
+    
+    total = len(all_proxies)
+    valid_proxies = []
+    blacklisted = []
+    
+    batch_size = 20
+    for i in range(0, total, batch_size):
+        batch = all_proxies[i:i+batch_size]
+        results = await asyncio.gather(*[test_proxy(p) for p in batch])
+        
+        for p, (is_valid, reason) in zip(batch, results):
+            if is_valid:
+                valid_proxies.append(p)
+            else:
+                blacklisted.append((p, reason))
+        print(f"\rProgress: {min(i+batch_size, total)}/{total} | Valid: {len(valid_proxies)}", end="")
+    
+    with open(VALIDATED_FILE, "w") as f:
+        for p in valid_proxies:
+            f.write(f"{p}\n")
+            
+    with open(BLACKLIST_FILE, "w") as f:
+        for p, r in blacklisted:
+            f.write(f"{p}|{r}\n")
+            
+    print(f"\n✅ Selesai! Valid proxies: {len(valid_proxies)}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+---
+
+## 📦 STEP 5: Opencode Rotating Client
+
+Buat file `opencode_client.py`:
+
+```python
+#!/usr/bin/env python3
+import os
+import requests
+import random
+
+API_KEY = os.getenv("OPENCODE_API_KEY", "")
+VALIDATED_FILE = "./proxies/validated.txt"
+
+def get_random_proxy():
+    if not os.path.exists(VALIDATED_FILE):
+        return None
+    with open(VALIDATED_FILE) as f:
+        proxies = [l.strip() for l in f if l.strip()]
+    return random.choice(proxies) if proxies else None
+
+def send_request(prompt: str, model: str = "free"):
+    proxy_ip = get_random_proxy()
+    if not proxy_ip:
+        print("❌ Tidak ada proxy yang tersedia.")
+        return None
+
+    proxies = {
+        "http": f"http://{proxy_ip}",
+        "https": f"https://{proxy_ip}"
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {API_KEY}"
+    }
+
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "temperature": 0.7
+    }
+
+    try:
+        res = requests.post(
+            "https://api.opencode.ai/v1/chat/completions",
+            json=payload,
+            headers=headers,
+            proxies=proxies,
+            timeout=15
+        )
+        if res.status_code == 200:
+            print(f"✓ Sukses via proxy: {proxy_ip}")
+            return res.json()
+        print(f"⚠️ Status code: {res.status_code}")
+        return None
+    except Exception as e:
+        print(f"✗ Gagal via {proxy_ip}: {e}")
+        return None
+
+if __name__ == "__main__":
+    test_res = send_request("Testing connection")
+    print(test_res)
+```

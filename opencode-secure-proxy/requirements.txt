@@ -1,0 +1,14 @@
+# Requirements for Opencode Secure Proxy Pool System
+
+# Core dependencies
+aiohttp>=3.8.0
+python-dotenv>=1.0.0
+
+# Optional: Geographic data for proxy tracking
+geoip2>=4.0.0
+
+# Optional: Encryption (if needed)
+pycryptodome>=3.19.0
+
+# Testing & development
+pytest>=7.0.0

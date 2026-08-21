@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Environment variables (SENSITIVE - NEVER COMMIT!)
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Generated proxy lists (regenerate weekly anyway)
+generated_proxy_result*.txt
+proxies/*.json
+proxies/scores.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
